@@ -1,0 +1,268 @@
+
+weather-forecast-linux:     file format elf32-littleriscv
+
+
+Disassembly of section mecrisp:
+
+00010000 <_start>:
+   10000:	f9c00513          	li	x10,-100
+   10004:	00000597          	auipc	x11,0x0
+   10008:	23058593          	addi	x11,x11,560 # 10234 <device>
+   1000c:	4609                	li	x12,2
+   1000e:	03800893          	li	x17,56
+   10012:	00000073          	ecall
+
+00010016 <framebuffer_mmap>:
+   10016:	872a                	mv	x14,x10
+   10018:	4501                	li	x10,0
+   1001a:	007e95b7          	lui	x11,0x7e9
+   1001e:	460d                	li	x12,3
+   10020:	4685                	li	x13,1
+   10022:	4781                	li	x15,0
+   10024:	0de00893          	li	x17,222
+   10028:	00000073          	ecall
+   1002c:	81aa                	mv	x3,x10
+   1002e:	00000f97          	auipc	x31,0x0
+   10032:	212f8f93          	addi	x31,x31,530 # 10240 <particles>
+   10036:	2ae9                	jal	10210 <clrscr>
+
+00010038 <particle_initialisation>:
+   10038:	827e                	mv	x4,x31
+   1003a:	6285                	lui	x5,0x1
+   1003c:	12fd                	addi	x5,x5,-1
+   1003e:	03700593          	li	x11,55
+   10042:	84ae                	mv	x9,x11
+   10044:	4601                	li	x12,0
+
+00010046 <mandala>:
+   10046:	08258413          	addi	x8,x11,130 # 7e9082 <particles+0x7d8e42>
+   1004a:	0412                	slli	x8,x8,0x4
+   1004c:	008fa023          	sw	x8,0(x31)
+   10050:	08260413          	addi	x8,x12,130
+   10054:	0412                	slli	x8,x8,0x4
+   10056:	008fa223          	sw	x8,4(x31)
+   1005a:	24000413          	li	x8,576
+   1005e:	008fae23          	sw	x8,28(x31)
+   10062:	020f8f93          	addi	x31,x31,32
+
+00010066 <mandala_next_point_on_cycle>:
+   10066:	2285                	jal	101c6 <mandala_cycle>
+   10068:	40165713          	srai	x14,x12,0x1
+   1006c:	95ba                	add	x11,x11,x14
+   1006e:	2aa1                	jal	101c6 <mandala_cycle>
+   10070:	fc959be3          	bne	x11,x9,10046 <mandala>
+   10074:	fa69                	bnez	x12,10046 <mandala>
+
+00010076 <wave_initialisation>:
+   10076:	4c81                	li	x25,0
+   10078:	08000d13          	li	x26,128
+   1007c:	f5a00d93          	li	x27,-166
+
+00010080 <animation_loop>:
+   10080:	0d85                	addi	x27,x27,1
+   10082:	2279                	jal	10210 <clrscr>
+   10084:	40000713          	li	x14,1024
+   10088:	18edde63          	bge	x27,x14,10224 <bye>
+   1008c:	867e                	mv	x12,x31
+
+0001008e <temperature>:
+   1008e:	1601                	addi	x12,x12,-32
+   10090:	4e40                	lw	x8,28(x12)
+   10092:	e015                	bnez	x8,100b6 <temperature_skip_wall>
+   10094:	8692                	mv	x13,x4
+
+00010096 <temperature_pair_loop>:
+   10096:	28f9                	jal	10174 <xy_distance>
+   10098:	00fc5b63          	bge	x24,x15,100ae <temperature_skip_pair>
+   1009c:	0006ae23          	sw	x0,28(x13)
+   100a0:	408c5513          	srai	x10,x24,0x8
+   100a4:	2855                	jal	10158 <sqrt>
+   100a6:	8d19                	sub	x10,x10,x14
+   100a8:	04050513          	addi	x10,x10,64
+   100ac:	942a                	add	x8,x8,x10
+
+000100ae <temperature_skip_pair>:
+   100ae:	02068693          	addi	x13,x13,32
+   100b2:	fff692e3          	bne	x13,x31,10096 <temperature_pair_loop>
+
+000100b6 <temperature_skip_wall>:
+   100b6:	ce00                	sw	x8,24(x12)
+   100b8:	221d                	jal	101de <paintparticlex12>
+   100ba:	fc461ae3          	bne	x12,x4,1008e <temperature>
+
+000100be <force>:
+   100be:	2205                	jal	101de <paintparticlex12>
+   100c0:	4e5c                	lw	x15,28(x12)
+   100c2:	ebb9                	bnez	x15,10118 <force_skip_wall>
+   100c4:	4e04                	lw	x9,24(x12)
+   100c6:	403cde93          	srai	x29,x25,0x3
+   100ca:	02000f13          	li	x30,32
+   100ce:	017d9793          	slli	x15,x27,0x17
+   100d2:	00f04463          	bgtz	x15,100da <force+0x1c>
+   100d6:	403d5f13          	srai	x30,x26,0x3
+   100da:	8692                	mv	x13,x4
+
+000100dc <force_pair_loop>:
+   100dc:	2861                	jal	10174 <xy_distance>
+   100de:	02fc5563          	bge	x24,x15,10108 <force_skip_pair>
+   100e2:	289d                	jal	10158 <sqrt>
+   100e4:	8705                	srai	x14,x14,0x1
+   100e6:	fc070c13          	addi	x24,x14,-64
+   100ea:	0c000713          	li	x14,192
+   100ee:	4e9c                	lw	x15,24(x13)
+   100f0:	8f05                	sub	x14,x14,x9
+   100f2:	8f1d                	sub	x14,x14,x15
+   100f4:	070a                	slli	x14,x14,0x2
+   100f6:	461c                	lw	x15,8(x12)
+   100f8:	4680                	lw	x8,8(x13)
+   100fa:	2859                	jal	10190 <force_x>
+   100fc:	9eaa                	add	x29,x29,x10
+   100fe:	852e                	mv	x10,x11
+   10100:	465c                	lw	x15,12(x12)
+   10102:	46c0                	lw	x8,12(x13)
+   10104:	2071                	jal	10190 <force_x>
+   10106:	9f2a                	add	x30,x30,x10
+
+00010108 <force_skip_pair>:
+   10108:	02068693          	addi	x13,x13,32
+   1010c:	fdf698e3          	bne	x13,x31,100dc <force_pair_loop>
+   10110:	01d62823          	sw	x29,16(x12)
+   10114:	01e62a23          	sw	x30,20(x12)
+
+00010118 <force_skip_wall>:
+   10118:	02060613          	addi	x12,x12,32
+   1011c:	fbf611e3          	bne	x12,x31,100be <force>
+
+00010120 <velocity>:
+   10120:	1611                	addi	x12,x12,-28
+   10122:	2051                	jal	101a6 <velocity_x>
+   10124:	1671                	addi	x12,x12,-4
+   10126:	2041                	jal	101a6 <velocity_x>
+   10128:	285d                	jal	101de <paintparticlex12>
+   1012a:	fe461be3          	bne	x12,x4,10120 <velocity>
+
+0001012e <waves>:
+   1012e:	404cd793          	srai	x15,x25,0x4
+   10132:	40fd0d33          	sub	x26,x26,x15
+   10136:	404d5793          	srai	x15,x26,0x4
+   1013a:	9cbe                	add	x25,x25,x15
+
+0001013c <rain>:
+   1013c:	f40dc2e3          	bltz	x27,10080 <animation_loop>
+   10140:	007df793          	andi	x15,x27,7
+   10144:	ff95                	bnez	x15,10080 <animation_loop>
+   10146:	017d9793          	slli	x15,x27,0x17
+   1014a:	83c5                	srli	x15,x15,0x11
+   1014c:	9792                	add	x15,x15,x4
+   1014e:	0007a223          	sw	x0,4(x15)
+   10152:	0007ae23          	sw	x0,28(x15)
+   10156:	b72d                	j	10080 <animation_loop>
+
+00010158 <sqrt>:
+   10158:	400007b7          	lui	x15,0x40000
+   1015c:	4701                	li	x14,0
+   1015e:	00e7ebb3          	or	x23,x15,x14
+   10162:	8305                	srli	x14,x14,0x1
+   10164:	017c6563          	bltu	x24,x23,1016e <sqrt+0x16>
+   10168:	417c0c33          	sub	x24,x24,x23
+   1016c:	8f5d                	or	x14,x14,x15
+   1016e:	8389                	srli	x15,x15,0x2
+   10170:	f7fd                	bnez	x15,1015e <sqrt+0x6>
+   10172:	8082                	ret
+
+00010174 <xy_distance>:
+   10174:	4208                	lw	x10,0(x12)
+   10176:	424c                	lw	x11,4(x12)
+   10178:	429c                	lw	x15,0(x13)
+   1017a:	42d8                	lw	x14,4(x13)
+   1017c:	8d1d                	sub	x10,x10,x15
+   1017e:	8d99                	sub	x11,x11,x14
+   10180:	02a507b3          	mul	x15,x10,x10
+   10184:	02b58733          	mul	x14,x11,x11
+   10188:	00e78c33          	add	x24,x15,x14
+   1018c:	6791                	lui	x15,0x4
+   1018e:	8082                	ret
+
+00010190 <force_x>:
+   10190:	02e50533          	mul	x10,x10,x14
+   10194:	8519                	srai	x10,x10,0x6
+   10196:	8f81                	sub	x15,x15,x8
+   10198:	078e                	slli	x15,x15,0x3
+   1019a:	953e                	add	x10,x10,x15
+   1019c:	03850533          	mul	x10,x10,x24
+   101a0:	02954533          	div	x10,x10,x9
+   101a4:	8082                	ret
+
+000101a6 <velocity_x>:
+   101a6:	4a08                	lw	x10,16(x12)
+   101a8:	850d                	srai	x10,x10,0x3
+   101aa:	460c                	lw	x11,8(x12)
+   101ac:	95aa                	add	x11,x11,x10
+   101ae:	4208                	lw	x10,0(x12)
+   101b0:	00b507b3          	add	x15,x10,x11
+   101b4:	0057e563          	bltu	x15,x5,101be <velocity_x+0x18>
+   101b8:	8585                	srai	x11,x11,0x1
+   101ba:	40b005b3          	neg	x11,x11
+   101be:	c60c                	sw	x11,8(x12)
+   101c0:	952e                	add	x10,x10,x11
+   101c2:	c208                	sw	x10,0(x12)
+   101c4:	8082                	ret
+
+000101c6 <mandala_cycle>:
+   101c6:	00259713          	slli	x14,x11,0x2
+   101ca:	ddb3d437          	lui	x8,0xddb3d
+   101ce:	74340413          	addi	x8,x8,1859 # ddb3d743 <particles+0xddb2d503>
+   101d2:	02871733          	mulh	x14,x14,x8
+   101d6:	0705                	addi	x14,x14,1
+   101d8:	8705                	srai	x14,x14,0x1
+   101da:	963a                	add	x12,x12,x14
+   101dc:	8082                	ret
+
+000101de <paintparticlex12>:
+   101de:	4208                	lw	x10,0(x12)
+   101e0:	424c                	lw	x11,4(x12)
+   101e2:	00255393          	srli	x7,x10,0x2
+   101e6:	0025d413          	srli	x8,x11,0x2
+   101ea:	038a                	slli	x7,x7,0x2
+   101ec:	6789                	lui	x15,0x2
+   101ee:	e0078793          	addi	x15,x15,-512 # 1e00 <ONE+0x1dc0>
+   101f2:	028787b3          	mul	x15,x15,x8
+   101f6:	93be                	add	x7,x7,x15
+   101f8:	938e                	add	x7,x7,x3
+   101fa:	4e5c                	lw	x15,28(x12)
+   101fc:	c789                	beqz	x15,10206 <paintparticlex12+0x28>
+   101fe:	010007b7          	lui	x15,0x1000
+   10202:	17fd                	addi	x15,x15,-1
+   10204:	a019                	j	1020a <paintparticlex12+0x2c>
+   10206:	67c1                	lui	x15,0x10
+   10208:	17fd                	addi	x15,x15,-1
+   1020a:	00f3a023          	sw	x15,0(x7)
+   1020e:	8082                	ret
+
+00010210 <clrscr>:
+   10210:	870e                	mv	x14,x3
+   10212:	007e97b7          	lui	x15,0x7e9
+   10216:	978e                	add	x15,x15,x3
+   10218:	00072023          	sw	x0,0(x14)
+   1021c:	0711                	addi	x14,x14,4
+   1021e:	fef71de3          	bne	x14,x15,10218 <clrscr+0x8>
+   10222:	8082                	ret
+
+00010224 <bye>:
+   10224:	4501                	li	x10,0
+   10226:	4581                	li	x11,0
+   10228:	4601                	li	x12,0
+   1022a:	4681                	li	x13,0
+   1022c:	05d00893          	li	x17,93
+   10230:	00000073          	ecall
+
+00010234 <device>:
+   10234:	7665642f          	0x7665642f
+   10238:	3062662f          	0x3062662f
+   1023c:	0000                	unimp
+	...
+
+Disassembly of section userdictionary:
+
+00010240 <particles>:
+	...

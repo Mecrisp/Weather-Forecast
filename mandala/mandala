@@ -1,0 +1,6 @@
+#!/bin/sh
+
+gforth Mandala.fs
+convert Mandala.pnm Mandala.png
+rm Mandala.pnm
+

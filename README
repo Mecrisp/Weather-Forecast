@@ -1,0 +1,114 @@
+
+--------------------------------------------------------------------------------
+  Weather Forecast
+  Lovebyte 2022
+  Mecrisp
+
+  Matthias Koch
+  m-atthias@users.sf.net
+  http://mecrisp.sourceforge.net/
+--------------------------------------------------------------------------------
+
+A particle simulator running in 512 bytes on RISC-V RV32IMC
+
+Weather forecast is designed for GD32VF103 microcontrollers and
+draws vector graphics on an analog oscilloscope in XY mode
+connected to
+
+   GND and the two DAC channels on pins
+   PA4 (vertical) and
+   PA5 (horizontal).
+
+At the beginning, a sun is displayed, which bursts into many drops
+when rain touches the sun. Waves and spray fill the canvas,
+and you can observe intermittent rainfall and forming of clouds.
+
+--------------------------------------------------------------------------------
+  Design ideas:
+--------------------------------------------------------------------------------
+
+Weather Forecast implements a "smoothed particle hydrodynamics" simulation
+using carefully scaled fixpoint integers only.
+
+https://en.wikipedia.org/wiki/Smoothed-particle_hydrodynamics
+
+Every particle has force, velocity and position vectors,
+a temperature and a wall flag and its behaviour is simulated by numerically
+integrating newtons laws of motion for all pairs of particles, taking
+collisions, viscosity, temperature, and gravity into account.
+
+The particle table is filled with an old, but obscure "Mandala" algorithm:
+Rotations of pixels by fractional angles in closed cycles on integer coordinates
+sometimes result in long, interesting and artistic curves.
+Proof-of-concept Mandala algorithm code for Gforth is included
+for further exploration.
+
+Rainfall is implemented by directly setting the y-coordinates of particles
+to the top of the image in a pattern derived by shifting from the frame counter,
+clearing the wall flag of the choosen particle along with the move.
+
+At the beginning, all particles are flagged as "wall", being immobile.
+Collisions with movable particles clear the wall flag, so the sun bursts on
+first contact with rain.
+
+A Minsky circle algorithm updates sine and cosine values, which are
+- depending on frame counter - fed along with gravity as initial values
+into the force integrals of the particle simulator to cause waves and clouds.
+
+All other visible effects result from the physics
+simulation running on these inputs.
+
+--------------------------------------------------------------------------------
+  How to run:
+--------------------------------------------------------------------------------
+
+If you have connected your
+
+Longan Nano board to
+             a USB-serial cable with 3.3V logic levels
+
+3V3 or 5V -- VCC (measure the voltage present here)
+R0        -- TXD
+T0        -- RXD
+GND       -- GND
+
+you can flash it if you first
+
+* Press and hold BOOT0 button
+* Press and release Reset button
+* Release BOOT0 button
+
+and then execute
+
+stm32loader -e -w -v -p /dev/ttyUSB0 weather-forecast.bin
+
+on your host machine.
+
+Press and release Reset button to start demo.
+
+
+PS: There is also a version for Linux with qemu-user-static
+    that uses a mmap'ed 1920x1080x32bpp framebuffer through syscalls
+    so that you can at least try the effects of Weather Forecast
+    on your desktop machine.
+
+--------------------------------------------------------------------------------
+  Credits:
+--------------------------------------------------------------------------------
+
+* Particle simulator inspiration for Weather Forecast:
+
+https://www.ioccc.org/2012/endoh1/hint.html
+https://github.com/davidedc/Ascii-fluid-simulation-deobfuscated/
+
+* Square root algorithm from the book Hacker's Delight:
+
+http://www.hackersdelight.org/
+
+* Minsky circle algorithm:
+
+https://nbickford.wordpress.com/2011/04/03/the-minsky-circle-algorithm/
+
+* Mandala algorithm based on integer rotations:
+
+https://web.archive.org/web/20061211143039/www.tiac.net/~sw/2005/03/Mandala/index.html

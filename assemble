@@ -1,0 +1,12 @@
+#!/bin/sh
+
+riscv64-linux-gnu-as weather-forecast.s -o weather-forecast.o -march=rv32im
+riscv64-linux-gnu-ld -o weather-forecast.elf -T memmap weather-forecast.o -m elf32lriscv
+riscv64-linux-gnu-objdump -Mnumeric -D weather-forecast.elf > weather-forecast.list
+riscv64-linux-gnu-objcopy weather-forecast.elf weather-forecast.bin -O binary
+
+rm -f weather-forecast.o
+rm -f weather-forecast.elf
+
+md5sum *.bin
+ls -l *.bin

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+riscv64-linux-gnu-as -o weather-forecast-linux.o weather-forecast-linux.s -march=rv32im
+riscv64-linux-gnu-ld -T mecrisp.ld -z max-page-size=4096 -o weather-forecast-linux weather-forecast-linux.o -m elf32lriscv
+riscv64-linux-gnu-objdump -Mnumeric -D weather-forecast-linux > weather-forecast-linux.list
+
+rm -f weather-forecast-linux.o
